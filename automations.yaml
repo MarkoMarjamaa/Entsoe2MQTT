@@ -1,0 +1,100 @@
+################
+# Electricity price day change
+################
+  - alias: Advance Electricity Price
+    trigger:
+      - platform: time
+        at: "00:00:02"
+    action:
+      - service: mqtt.publish
+        data:
+          retain: true
+          topic: Entsoe2MQTT/sensor/ElectricityPrice
+          payload_template: >-
+            {
+            "state": "ok",
+            "today": {{ state_attr('sensor.electricity_price','tomorrow') | to_json }},
+            "raw_today": {{ state_attr('sensor.electricity_price','raw_tomorrow') | to_json }}
+            }
+
+
+  - alias: 'Set warm water heater start time'
+    description: ''
+    mode: single
+    trigger:
+    - platform: time
+      at: '23:10:00'
+    action:
+    - if:
+        - alias: "If no cheapest hours found"
+          condition: state
+          entity_id: sensor.cheapest_2_hours_energy_tomorrow
+          state: unknown
+      then:
+        - service: input_datetime.set_datetime
+          data:
+            time: '03:00:00'
+          target:
+            entity_id: input_datetime.warm_water_heater_on_time
+      else:
+        - service: input_datetime.set_datetime
+          data:
+            time: '{{ as_timestamp(states(''sensor.cheapest_2_hours_energy_tomorrow'')) | timestamp_custom(''%H:%M'') }}'
+          target:
+            entity_id: input_datetime.warm_water_heater_on_time
+
+
+  - alias: Turn on Warm Water Heater Logical
+    trigger:
+      platform: time
+      at: input_datetime.warm_water_heater_on_time
+    action:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.warm_water_heater_logical
+
+  - alias: Turn off Warm Water Heater Logical
+    trigger:
+      platform: time
+      at: input_datetime.warm_water_heater_off_time
+    action:
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.warm_water_heater_logical
+
+  - alias: Turn on Warm Water Heater
+    trigger:
+      - platform: state
+        entity_id: input_boolean.warm_water_heater_logical
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.warm_water_heater_manual
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: switch.warm_water_relay_switch
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.warm_water_heater_logical
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.warm_water_heater_manual
+        state: 'on'
+    action:
+      - service: switch.turn_on
+        entity_id: switch.warm_water_relay_switch
+        
+  - alias: Turn off Warm Water Heater
+    trigger:
+      - platform: state
+        entity_id: input_boolean.warm_water_heater_logical
+        to: 'off'
+      - platform: state
+        entity_id: input_boolean.warm_water_heater_manual
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: switch.warm_water_relay_switch
+        state: 'on'
+    action:
+      - entity_id: switch.warm_water_relay_switch
+        service: switch.turn_off
+
