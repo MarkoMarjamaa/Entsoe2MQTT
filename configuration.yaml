@@ -33,7 +33,6 @@ template:
           {% endfor %}
 
   - sensor:
-#      electricity_price_average:
       - name: "Electricity Price Average"
         unique_id: electricity_price_average
         icon: mdi:cash
@@ -43,7 +42,6 @@ template:
           {% set values = raw_today | map(attribute='value') | list %}
           {{ (values | sum / values | length if values | length > 0 else 0 ) / 100.0| float }}
 
-#      electricity_price_min:
       - name: "Electricity Price Min"
         unique_id: electricity_price_min
         icon: mdi:cash
@@ -53,7 +51,6 @@ template:
           {% set values = raw_today | map(attribute='value') | list %}
           {{ ( values | min if values | length > 0 else 0 ) / 100.0| float }}
 
-#      electricity_price_max:
       - name: "Electricity Price Max"
         unique_id: electricity_price_max
         icon: mdi:cash
