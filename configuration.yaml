@@ -90,3 +90,19 @@ template:
               {{ best_hours[0].start }}
             {% endif %}
           {% endif %}
+
+input_boolean:
+  warm_water_heater_manual:
+    name: Warm Water Heater Manual
+  warm_water_heater_logical:
+    name: Warm Water Heater Logical
+
+input_datetime:
+  warm_water_heater_on_time:
+    name: "Warm Water Heater On Time"
+    has_time: true
+    has_date: false
+  warm_water_heater_off_time:
+    name: "Warm Water Heater Off Time"
+    has_time: true
+    has_date: false
