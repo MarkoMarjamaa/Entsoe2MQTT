@@ -65,22 +65,42 @@ mqtt_client.unsubscribe(MQTT_TOPIC)
 # If tomorrow data has not been successfully fetched yet, try
 if ( not last_fetched ):
 	today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+	prices_today = None
+	prices_tomorrow = None
 	
-	# Get prices for today
-	prices_today = client.query_day_ahead_prices(
-		country_code= Country,  # Example: Germany
-		start=pd.to_datetime(today_start),
-		end=pd.to_datetime(today_start + timedelta(days=1)),
-		resolution = '60min'
-		)
+	for _attemp in range(5):
+		try:
+        	# Get prices for today
+			prices_today = client.query_day_ahead_prices(
+				country_code= Country,  
+				start=pd.to_datetime(today_start),
+				end=pd.to_datetime(today_start + timedelta(days=1)),
+				resolution = '60min'
+				)
+		except Exception as e:
+			print ("Trying again")
+			continue
+		else:
+			break
+	if (prices_today is None ): 
+		exit()
 
-	# Get prices for tomorrow
-	prices_tomorrow = client.query_day_ahead_prices(
-		country_code= Country,
-		start=pd.to_datetime(today_start + timedelta(days=1)),
-		end=pd.to_datetime(today_start + timedelta(days=2)),
-		resolution = '60min'
-	)
+	for _attemp in range(5):
+		try:
+			# Get prices for tomorrow
+			prices_tomorrow = client.query_day_ahead_prices(
+				country_code= Country,
+				start=pd.to_datetime(today_start + timedelta(days=1)),
+				end=pd.to_datetime(today_start + timedelta(days=2)),
+				resolution = '60min'
+			)
+		except Exception as e:
+			print ("Trying again")
+			continue
+		else:
+			break
+	if (prices_tomorrow is None ): 
+		exit()
 
 	# Create the payload in the specified structure
 	message = {
