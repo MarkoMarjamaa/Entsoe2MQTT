@@ -1,4 +1,4 @@
-entsoe-py==0.6.18
+entsoe-py==0.7.4
 paho-mqtt==1.6.1
 pytz==2021.1
 pandas==2.2.3
