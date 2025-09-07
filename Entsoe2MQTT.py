@@ -74,8 +74,7 @@ if ( not last_fetched ):
 			prices_today = client.query_day_ahead_prices(
 				country_code= Country,  
 				start=pd.to_datetime(today_start),
-				end=pd.to_datetime(today_start + timedelta(days=1)),
-				resolution = '60min'
+				end=pd.to_datetime(today_start + timedelta(days=1))
 				)
 		except Exception as e:
 			print ("Trying again")
@@ -91,8 +90,7 @@ if ( not last_fetched ):
 			prices_tomorrow = client.query_day_ahead_prices(
 				country_code= Country,
 				start=pd.to_datetime(today_start + timedelta(days=1)),
-				end=pd.to_datetime(today_start + timedelta(days=2)),
-				resolution = '60min'
+				end=pd.to_datetime(today_start + timedelta(days=2))
 			)
 		except Exception as e:
 			print ("Trying again")
