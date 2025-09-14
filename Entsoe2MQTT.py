@@ -83,6 +83,7 @@ if ( not last_fetched ):
 			break
 	if (prices_today is None ): 
 		exit()
+	prices_today_15min = prices_today.resample('15min').ffill()
 
 	for _attemp in range(5):
 		try:
@@ -99,6 +100,7 @@ if ( not last_fetched ):
 			break
 	if (prices_tomorrow is None ): 
 		exit()
+	prices_tomorrow_15min = prices_tomorrow.resample('15min').ffill()
 
 	# Create the payload in the specified structure
 	message = {
@@ -106,7 +108,11 @@ if ( not last_fetched ):
 			"today": prices_today.tolist(),
 			"tomorrow": prices_tomorrow.tolist(),
 			"raw_today": format_prices(prices_today),
-			"raw_tomorrow": format_prices(prices_tomorrow)
+			"raw_tomorrow": format_prices(prices_tomorrow),
+			"today_15min": prices_today_15min.tolist(),
+			"tomorrow_15min": prices_tomorrow_15min.tolist(),
+			"raw_today_15min": format_prices(prices_today_15min),
+			"raw_tomorrow_15min": format_prices(prices_tomorrow_15min)
 	}
 
 	#print(message)
