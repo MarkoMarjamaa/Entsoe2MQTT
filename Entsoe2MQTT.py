@@ -38,7 +38,7 @@ def format_prices(prices):
     for index, value in prices.items():
         value_dict = {
             "start": print_time(index),
-            "end": print_time(index+ timedelta(hours=1)),
+            "end": print_time(index+ (timedelta(hours=1) if len(prices) < 30 else timedelta(minutes=15))),
             "value": value/10
             } 
         raw_list.append(value_dict)
