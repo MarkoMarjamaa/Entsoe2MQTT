@@ -14,7 +14,7 @@ mqtt:
 template:
   - trigger:
     - platform: time_pattern
-      minutes: "0"
+      minutes: "/15"
       seconds: "0"
     - platform: state
       entity_id: sensor.electricity_price
