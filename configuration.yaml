@@ -25,7 +25,7 @@ template:
         unit_of_measurement: 'EUR/kWh'
         state: >
           {% set current_time = now() %}
-          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today') %}
+          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today_15min') %}
           {% for entry in raw_today %}
             {% if current_time >= strptime(entry.start, '%Y-%m-%dT%H:%M:%S%z') and current_time < strptime(entry.end, '%Y-%m-%dT%H:%M:%S%z') %}
               {{ entry.value / 100.0| float }}
@@ -38,7 +38,7 @@ template:
         icon: mdi:cash
         unit_of_measurement: 'EUR/kWh'
         state: >
-          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today') %}
+          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today_15min') %}
           {% set values = raw_today | map(attribute='value') | list %}
           {{ (values | sum / values | length if values | length > 0 else 0 ) / 100.0| float }}
 
@@ -47,7 +47,7 @@ template:
         icon: mdi:cash
         unit_of_measurement: 'EUR/kWh'
         state: >
-          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today') %}
+          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today_15min') %}
           {% set values = raw_today | map(attribute='value') | list %}
           {{ ( values | min if values | length > 0 else 0 ) / 100.0| float }}
 
@@ -56,7 +56,7 @@ template:
         icon: mdi:cash
         unit_of_measurement: 'EUR/kWh'
         state: >
-          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today') %}
+          {% set raw_today = state_attr('sensor.electricity_price', 'raw_today_15min') %}
           {% set values = raw_today | map(attribute='value') | list %}
           {{ (values | max if values | length > 0 else 0) / 100.0| float }}
 
@@ -65,14 +65,16 @@ template:
         device_class: timestamp
         state: >
          {% set search_start_hour = 0 %}
+         {% set search_start_min = 0 %}
           {% set search_end_hour = 18 %}
-          {% set window_size = 2 %}
-          {% set raw_tomorrow = state_attr('sensor.electricity_price', 'raw_tomorrow') %}
+          {% set search_end_min = 59 %}
+          {% set window_size = 8 %}
+          {% set raw_tomorrow = state_attr('sensor.electricity_price', 'raw_tomorrow_15min') %}
           {%- set ns = namespace(min_sum = None, best_start = None) -%}
           {% if raw_tomorrow is none or raw_tomorrow | length < window_size %}
             none
           {% else %}
-            {% set filtered = raw_tomorrow | selectattr('start', '>=', (now()+ timedelta( hours = (24))).replace(hour=search_start_hour, minute=0, second=0, microsecond=0).isoformat()) | selectattr('end', '<=', (now()+ timedelta( hours = (24))).replace(hour=search_end_hour, minute=59, second=59, microsecond=0).isoformat()) | list %}
+            {% set filtered = raw_tomorrow | selectattr('start', '>=', (now()+ timedelta( hours = (24))).replace(hour=search_start_hour, minute=search_start_min, second=0, microsecond=0).isoformat()) | selectattr('end', '<=', (now()+ timedelta( hours = (24))).replace(hour=search_end_hour, minute=search_end_min, second=59, microsecond=0).isoformat()) | list %}
             {% for i in range(filtered | length - window_size + 1) %}
               {% set sum_value = filtered[i:i+window_size] | map(attribute='value') | sum %}
               {% if ns.min_sum is none or sum_value < ns.min_sum %}
